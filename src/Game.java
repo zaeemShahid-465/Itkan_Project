@@ -112,7 +112,7 @@ public class Game extends Canvas implements Runnable {
         bs.show();
     }
 
-    public static void main() {
+    public static void main(String args[]) {
         Game game = new Game();
         game.start();
     }
