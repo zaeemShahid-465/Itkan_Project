@@ -1,8 +1,9 @@
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
-import java.awt.Canvas;
-import java.awt.Dimension;
-import java.awt.Graphics;
+import java.awt.*;
 import java.awt.image.BufferStrategy;
+import java.awt.image.BufferedImage;
+import java.io.File;
 
 public class Game extends Canvas implements Runnable {
     private JFrame frame;
@@ -10,6 +11,8 @@ public class Game extends Canvas implements Runnable {
     public final int WIDTH = 800;
     public final int HEIGHT = 600;
     private Thread gameThread;
+
+    Player p;
 
     public Game() {
         Dimension size = new Dimension(WIDTH, HEIGHT);
@@ -22,6 +25,29 @@ public class Game extends Canvas implements Runnable {
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+
+        loadContent();
+    }
+
+    public void loadContent() {
+        Image playerImg = null;
+        try {
+            File f = new File("Thanos.jpg");
+            playerImg = ImageIO.read(f);
+            p = new Player(
+                    playerImg,
+                    new Rectangle(100, 100, config.playerSize, config.playerSize),
+                    new HealthBar(
+                            config.maxHealth, new Rectangle(100, 100, config.healthBarLength, config.healthBarHeight),
+                            new Rectangle(100, 100, config.healthBarLength, config.healthBarHeight)));
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        addKeyListener(p);
+        setFocusable(true);
+        requestFocus();
     }
 
     public synchronized void start() {
@@ -53,13 +79,15 @@ public class Game extends Canvas implements Runnable {
         int frames = 0;
         int ticks = 0;
 
+
         while (running) {
             long now = System.nanoTime();
             delta += (now - lastTime) / TIME_PER_TICK;
             lastTime = now;
 
             if (delta >= 1) {
-                tick();    // update logic
+                double dt = 1.0 / TARGET_FPS;
+                tick(dt);    // update logic
                 render();  // render frame
                 ticks++;
                 frames++;
@@ -87,8 +115,8 @@ public class Game extends Canvas implements Runnable {
 
 
     // Game logic goes here
-    public void tick() {
-
+    public void tick(double dt) {
+        p.update(dt);
     }
 
     // Drawing
@@ -105,7 +133,7 @@ public class Game extends Canvas implements Runnable {
         g.clearRect(0, 0, WIDTH, HEIGHT);
 
         // Put drawing logic here
-
+        p.draw(g);
 
 
         g.dispose();

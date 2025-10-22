@@ -2,17 +2,13 @@ import java.awt.*;
 
 public class HealthBar {
     private int health;
-    private Image redImg;
-    private Rectangle redRec;
-    private Rectangle greenRec;
-    private Image greenImg;
+    public Rectangle redRec;
+    public Rectangle greenRec;
 
-    public HealthBar(int h, Image greenImg, Rectangle redRec, Rectangle greenRec, Image redImg) {
+    public HealthBar(int h, Rectangle redRec, Rectangle greenRec) {
         health = h;
-        this.greenImg = greenImg;
         this.redRec = redRec;
         this.greenRec = greenRec;
-        this.redImg = redImg;
     }
 
     public int getHealth() {
@@ -28,7 +24,9 @@ public class HealthBar {
     }
 
     public void draw(Graphics g) {
-        g.drawImage(greenImg, greenRec.x, greenRec.y, greenRec.width, greenRec.height, null);
-        g.drawImage(redImg, redRec.x, redRec.y, redRec.width, redRec.height, null);
+        g.setColor(Color.RED);
+        g.fillRect(redRec.x, redRec.y - config.healthBarHeight - 5 /* <- offset */, config.maxHealth / 2, config.healthBarHeight);
+        g.setColor(Color.GREEN);
+        g.fillRect(greenRec.x, greenRec.y - config.healthBarHeight - 5, health / 2, config.healthBarHeight);
     }
 }
