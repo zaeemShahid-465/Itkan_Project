@@ -15,12 +15,16 @@ public class HealthBar {
         return health;
     }
 
+    public boolean isDead() {
+        return health <= 0;
+    }
+
     public void heal() {
         health++;
     }
 
-    public void damage() {
-        health--;
+    public void damage(int amount) {
+        health -= amount;
     }
 
     public void draw(Graphics g) {

@@ -5,8 +5,8 @@ import java.awt.event.KeyListener;
 public class Player extends Entity implements KeyListener {
     private int speed;
 
-    public Player(Image img, Rectangle rec, HealthBar healthBar) {
-        super(img, rec, healthBar);
+    public Player(Image idle, Image left, Image right, Rectangle rec, HealthBar healthBar) {
+        super(idle, left, right, rec, healthBar);
         dx = 0;
         dy = 0;
         speed = 200;
@@ -14,6 +14,8 @@ public class Player extends Entity implements KeyListener {
     
     @Override
     public void update(double dt) {
+        super.update(dt);
+
         rec.x += (int)(speed * dx * dt);
         rec.y += (int)(speed * dy * dt);
 
