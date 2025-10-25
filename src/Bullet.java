@@ -9,13 +9,13 @@ public class Bullet {
     private double angle;
     private boolean active;
 
-    public Bullet(Rectangle rect, Image img) {
+    public Bullet(Rectangle rect, Image img, double angle) {
         this.rect = rect;
         this.img = img;
-        speed = 200;
+        speed = 500;
         maxLifeTime = 10 * 60; //in milliseconds
         timeAlive = 0;
-        angle = 0;
+        this.angle = angle;
         active = true;
     }
 
@@ -27,16 +27,16 @@ public class Bullet {
         return rect;
     }
 
-    public void update() {
+    public void update(double dt) {
         if(active == false) {
             return;
         }
-        timeAlive++;
+        timeAlive += dt;
         if(timeAlive > maxLifeTime) {
             active = false;
         }
-        double dx = Math.cos(angle) * speed;
-        double dy = Math.sin(angle) * speed;
+        double dx = Math.cos(angle) * speed * dt;
+        double dy = Math.sin(angle) * speed * dt;
         rect.x += dx;
         rect.y += dy;
     }

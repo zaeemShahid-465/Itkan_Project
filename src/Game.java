@@ -46,6 +46,8 @@ public class Game extends Canvas implements Runnable {
         }
 
         addKeyListener(p);
+        addMouseListener(p);
+
         setFocusable(true);
         requestFocus();
     }
@@ -130,7 +132,8 @@ public class Game extends Canvas implements Runnable {
         Graphics g = bs.getDrawGraphics();
 
         // Clearing screen
-        g.clearRect(0, 0, WIDTH, HEIGHT);
+        g.setColor(Color.WHITE);
+        g.fillRect(0, 0, WIDTH, HEIGHT);
 
         // Put drawing logic here
         p.draw(g);
