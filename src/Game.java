@@ -13,6 +13,7 @@ public class Game extends Canvas implements Runnable {
     private Thread gameThread;
 
     Player p;
+    Zombie z;
 
     public Game() {
         Dimension size = new Dimension(WIDTH, HEIGHT);
@@ -31,6 +32,7 @@ public class Game extends Canvas implements Runnable {
 
     public void loadContent() {
         Image playerIdle, playerL, playerR;
+        Image zombieIdle, zombieRight, zombieLeft;
         try {
             File f = new File("playerIdle.png");
             playerIdle = ImageIO.read(f);
@@ -44,6 +46,18 @@ public class Game extends Canvas implements Runnable {
                     new HealthBar(
                             config.maxHealth, new Rectangle(100, 100, config.healthBarLength, config.healthBarHeight),
                             new Rectangle(100, 100, config.healthBarLength, config.healthBarHeight)));
+
+            File zI = new File("ZombieIdle.png");
+            zombieIdle = ImageIO.read(zI);
+            File zR = new File("ZombieR.png");
+            zombieRight = ImageIO.read(zR);
+            File zL = new File("ZombieL.png");
+            zombieLeft = ImageIO.read(zL);
+            z = new Zombie(
+                    zombieIdle, zombieLeft, zombieRight,
+                    new Rectangle(500, 500, config.playerSize, config.playerSize),
+                    new HealthBar(config.maxHealth, new Rectangle(500, 500, config.healthBarLength, config.healthBarHeight),
+                            new Rectangle(500, 500, config.healthBarLength, config.healthBarHeight)), p);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -123,6 +137,7 @@ public class Game extends Canvas implements Runnable {
     // Game logic goes here
     public void tick(double dt) {
         p.update(dt);
+        z.update(dt);
     }
 
     // Drawing
@@ -141,6 +156,7 @@ public class Game extends Canvas implements Runnable {
 
         // Put drawing logic here
         p.draw(g);
+        z.draw(g);
 
 
         g.dispose();
