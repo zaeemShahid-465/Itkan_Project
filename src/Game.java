@@ -30,12 +30,16 @@ public class Game extends Canvas implements Runnable {
     }
 
     public void loadContent() {
-        Image playerImg = null;
+        Image playerIdle, playerL, playerR;
         try {
-            File f = new File("Thanos.jpg");
-            playerImg = ImageIO.read(f);
+            File f = new File("playerIdle.png");
+            playerIdle = ImageIO.read(f);
+            File g = new File("playerL.png");
+            playerL = ImageIO.read(g);
+            File h = new File("playerR.png");
+            playerR = ImageIO.read(h);
             p = new Player(
-                    playerImg,
+                    playerIdle, playerL, playerR,
                     new Rectangle(100, 100, config.playerSize, config.playerSize),
                     new HealthBar(
                             config.maxHealth, new Rectangle(100, 100, config.healthBarLength, config.healthBarHeight),
