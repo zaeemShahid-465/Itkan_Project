@@ -21,7 +21,7 @@ public abstract class Entity {
             main = right;
         else if (dx == -1)
             main = left;
-        else
+        else if (dx == 0)
             main = idle;
     }
 

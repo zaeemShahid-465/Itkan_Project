@@ -11,7 +11,7 @@ import java.awt.Image;
 
 public class Player extends Entity implements KeyListener, MouseListener {
     private int speed;
-    private ArrayList<Bullet> bullets;
+    public ArrayList<Bullet> bullets;
     Image bulletImg;
 
     public Player(Image idle, Image left, Image right, Rectangle rec, HealthBar healthBar) {
@@ -59,6 +59,8 @@ public class Player extends Entity implements KeyListener, MouseListener {
 
     public void draw(Graphics g) {
         super.draw(g);
+        System.out.println("Bullets: " + bullets.size());
+
 
         for (Bullet b : bullets) {
             b.draw(g);
@@ -98,20 +100,25 @@ public class Player extends Entity implements KeyListener, MouseListener {
 
     @Override
     public void mouseClicked(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+        ((Component)e.getSource()).requestFocus();
+
         if(e.getButton() == MouseEvent.BUTTON1) {
             int mouseX = e.getX();
             int mouseY = e.getY();
 
             double angle = Math.atan2(mouseY - rec.y, mouseX - rec.x);
 
-            Rectangle rec = new Rectangle(this.rec.x, this.rec.y, 10, 10);
+            int startX = this.rec.x + this.rec.width / 2 - 5;
+            int startY = this.rec.y + this.rec.height / 2 - 5;
+            Rectangle rec = new Rectangle(startX, startY, 10, 10);
+
             bullets.add(new Bullet(rec, bulletImg, angle));
         }
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-
     }
 
     @Override

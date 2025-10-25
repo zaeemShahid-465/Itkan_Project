@@ -1,11 +1,16 @@
 import javax.imageio.ImageIO;
+import javax.print.attribute.standard.RequestingUserName;
 import javax.swing.JFrame;
 import java.awt.*;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Random;
 
 public class Game extends Canvas implements Runnable {
+    Random rand;
+
     private JFrame frame;
     private boolean running = false;
     public final int WIDTH = 800;
@@ -13,9 +18,33 @@ public class Game extends Canvas implements Runnable {
     private Thread gameThread;
 
     Player p;
-    Zombie z;
+    ArrayList<Zombie> enemies;
+
+    // Zombie data
+    File zI = new File("ZombieIdle.png");
+    Image zombieIdle;
+    File zR = new File("ZombieR.png");
+    Image zombieRight;
+    File zL = new File("ZombieL.png");
+    Image zombieLeft;
+
+    int timer;
+
+    int score;
+
+    double damageCoolDown;
+
+    boolean gameOver;
 
     public Game() {
+        rand = new Random();
+
+        timer = 0;
+
+        score = 0;
+
+        gameOver = true;
+
         Dimension size = new Dimension(WIDTH, HEIGHT);
         setPreferredSize(size);
 
@@ -32,7 +61,7 @@ public class Game extends Canvas implements Runnable {
 
     public void loadContent() {
         Image playerIdle, playerL, playerR;
-        Image zombieIdle, zombieRight, zombieLeft;
+        enemies = new ArrayList<>();
         try {
             File f = new File("playerIdle.png");
             playerIdle = ImageIO.read(f);
@@ -47,17 +76,14 @@ public class Game extends Canvas implements Runnable {
                             config.maxHealth, new Rectangle(100, 100, config.healthBarLength, config.healthBarHeight),
                             new Rectangle(100, 100, config.healthBarLength, config.healthBarHeight)));
 
-            File zI = new File("ZombieIdle.png");
             zombieIdle = ImageIO.read(zI);
-            File zR = new File("ZombieR.png");
             zombieRight = ImageIO.read(zR);
-            File zL = new File("ZombieL.png");
             zombieLeft = ImageIO.read(zL);
-            z = new Zombie(
-                    zombieIdle, zombieLeft, zombieRight,
-                    new Rectangle(500, 500, config.playerSize, config.playerSize),
-                    new HealthBar(config.maxHealth, new Rectangle(500, 500, config.healthBarLength, config.healthBarHeight),
-                            new Rectangle(500, 500, config.healthBarLength, config.healthBarHeight)), p);
+//            z = new Zombie(
+//                    zombieIdle, zombieLeft, zombieRight,
+//                    new Rectangle(500, 500, config.playerSize, config.playerSize),
+//                    new HealthBar(config.maxHealth, new Rectangle(500, 500, config.healthBarLength, config.healthBarHeight),
+//                            new Rectangle(500, 500, config.healthBarLength, config.healthBarHeight)), p);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -123,7 +149,6 @@ public class Game extends Canvas implements Runnable {
 
             if (System.currentTimeMillis() - timer >= 1000) {
                 timer += 1000;
-                System.out.println("FPS: " + frames + " | TICKS: " + ticks);
                 frames = 0;
                 ticks = 0;
             }
@@ -136,8 +161,77 @@ public class Game extends Canvas implements Runnable {
 
     // Game logic goes here
     public void tick(double dt) {
+        timer++;
+
+        // Adding new zombies
+        if (timer % (60 * 3) == 0) {
+            int num = rand.nextInt(4) +1;
+            int xPos = 0, yPos = 0;
+            switch (num) {
+                case 1:
+                    xPos = rand.nextInt(WIDTH);
+                    yPos = -50;
+                    break;
+                case 2:
+                    xPos = WIDTH + 50;
+                    yPos = rand.nextInt(HEIGHT);
+                    break;
+                case 3:
+                    xPos = rand.nextInt(WIDTH);
+                    yPos = HEIGHT + 50;
+                    break;
+                case 4:
+                    xPos = -50;
+                    yPos = rand.nextInt(HEIGHT);
+                    break;
+            }
+            enemies.add(new Zombie(
+                    zombieLeft, zombieRight, zombieIdle,
+                    new Rectangle(xPos, yPos, config.playerSize, config.playerSize),
+                    new HealthBar(config.maxHealth, new Rectangle(500, 500, config.healthBarLength, config.healthBarHeight),
+                            new Rectangle(500, 500, config.healthBarLength, config.healthBarHeight)), p));
+        }
+
+        // Updating all zombies
+        for (Zombie z : enemies) {
+            z.update(dt);
+        }
+
         p.update(dt);
-        z.update(dt);
+//        if (z != null)
+//            z.update(dt);
+
+        // Checking for enemy/bullet collisions
+        for (int i = 0; i < p.bullets.size(); i++) {
+            for (int j = 0; j < enemies.size(); j++) {
+                if (p.bullets.get(i).getBounds().intersects(enemies.get(j).rec)) {
+                    Zombie z = enemies.get(j);
+                    z.health.damage(20);
+                    p.bullets.get(i).setActive(false);
+                }
+            }
+        }
+
+        // Removing bullets and enemies if inactive
+        for (int i = enemies.size() - 1; i >= 0; i--) {
+            Zombie e = enemies.get(i);
+            if (!e.active) {
+                enemies.remove(i);
+                score += 50;
+            }
+        }
+
+        // Zombie player collision logic
+        for (Zombie z : enemies) {
+            if (z.rec.intersects(p.rec) && z.damageCoolDown <= 0) {
+                p.health.damage(20);
+                z.damageCoolDown = 1.0;
+            }
+        }
+
+        if (p.health.getHealth() <= 0)
+            gameOver = true;
+
     }
 
     // Drawing
@@ -155,8 +249,33 @@ public class Game extends Canvas implements Runnable {
         g.fillRect(0, 0, WIDTH, HEIGHT);
 
         // Put drawing logic here
-        p.draw(g);
-        z.draw(g);
+        // Game Over Screen
+        if (gameOver) {
+            Font f = new Font("", Font.PLAIN, 40);
+            g.setColor(Color.BLACK);
+            g.fillRect(0, 0, WIDTH, HEIGHT);
+            g.setFont(f); g.setColor(Color.RED);
+            g.drawString("GAME OVER", WIDTH / 2 - 130, HEIGHT / 2);
+            running = false;
+        }
+        else {
+
+
+            // score
+            g.setColor(Color.RED);
+            g.drawString("SCORE -> " + score, 10, 20);
+            g.setColor(Color.WHITE);
+
+
+            p.draw(g);
+
+//        if (z != null)
+//            z.draw(g);
+
+            for (Zombie z : enemies) {
+                z.draw(g);
+            }
+        }
 
 
         g.dispose();

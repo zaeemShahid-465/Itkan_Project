@@ -23,6 +23,10 @@ public class Bullet {
         return active;
     }
 
+    public void setActive(boolean b) {
+        this.active = b;
+    }
+
     public Rectangle getBounds() {
         return rect;
     }
